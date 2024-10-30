@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+
+import sys
+from math import *
+
+
+def binomial_law(n, k):
+    return ((factorial(n) / (factorial(k) * factorial(n - k))) * pow((1.0 / 6.0), k) * pow((5.0 / 6.0), (n - k)))
+
+
+def Calc_proba_of_a_kind(dice, nb_of_dice, die_nb):
+    proba = 0
+    occurence = dice.count(die_nb)
+    if (occurence >= nb_of_dice):
+        return (1)
+    else:
+        for i in range(nb_of_dice - occurence, 6 - occurence):
+            proba += binomial_law(5 - occurence, i)
+        return proba
+
+
+def Display(nb, combination, proba):
+    print("Chances to get a %d %s: %.2f%%" % (nb, combination, proba * 100))
+
+
+def pair(dice, combination):
+    if (len(combination) != 2):
+        sys.exit(84)
+    try:
+        die_nb = int(combination[1])
+    except ValueError:
+        sys.exit(84)
+    Display(die_nb, "pair", Calc_proba_of_a_kind(dice, 2, die_nb))
+
+
+def three(dice, combination):
+    if (len(combination) != 2):
+        sys.exit(84)
+    try:
+        die_nb = int(combination[1])
+    except ValueError:
+        sys.exit(84)
+    Display(die_nb, "three-of-a-kind", Calc_proba_of_a_kind(dice, 3, die_nb))
+
+
+def four(dice, combination):
+    if (len(combination) != 2):
+        sys.exit(84)
+    try:
+        die_nb = int(combination[1])
+    except ValueError:
+        sys.exit(84)
+    Display(die_nb, "four-of-a-kind", Calc_proba_of_a_kind(dice, 4, die_nb))
+
+
+def yams(dice, combination):
+    if (len(combination) != 2):
+        sys.exit(84)
+    try:
+        die_nb = int(combination[1])
+    except ValueError:
+        sys.exit(84)
+    Display(die_nb, "yams", Calc_proba_of_a_kind(dice, 5, die_nb))
+
+
+def full(dice, combination):
+    if (len(combination) != 3):
+        sys.exit(84)
+    try:
+        die_nb1 = int(combination[1])
+        die_nb2 = int(combination[2])
+    except ValueError:
+        sys.exit(84)
+    if (die_nb2 < 0 or die_nb2 > 6 or die_nb2 == die_nb1):
+        sys.exit(84)
+        
+    occu1 = dice.count(die_nb1)
+    occu2 = dice.count(die_nb2)
+    if (occu1 == 3 and occu2 == 2):
+        print("Chances to get a %d %s of %d: %.2f%%" % (die_nb1, combination[0], die_nb2, 100))
+    else:
+        C1 = factorial(5 - occu1 - occu2) / (factorial(3 - occu2) * factorial((5 - occu2 - occu1) - (3 - occu1)))
+        C2 = factorial(2 - occu2) / (factorial(2 - occu2) * factorial((2 - occu2) - (2 - occu2)))
+        proba = (C1 * C2) / pow(6, (5 - occu1 - occu2))
+        print("Chances to get a %d %s of %d: %.2f%%" % (die_nb1, combination[0], die_nb2, 100 * proba))
+
+
+def straight(dice, combination):
+    if (len(combination) != 2):
+        sys.exit(84)
+    try:
+        die_nb = int(combination[1])
+    except ValueError:
+        sys.exit(84)
+    if (die_nb < 5):
+        sys.exit(84)
+
+    occurence1 = dice.count(die_nb)
+    occurence2 = dice.count(die_nb - 1)
+    occurence3 = dice.count(die_nb - 2)
+    occurence4 = dice.count(die_nb - 3)
+    occurence5 = dice.count(die_nb - 4)
+    occurence = occurence1 + occurence2 + occurence3 + occurence4 + occurence5
+    if (occurence == 5 and occurence1 == 1 and occurence2 == 1 and occurence3 == 1 and occurence4 == 1 and occurence5 == 1):
+        print("Chances to get a %d %s: %.2f%%" % (die_nb, combination[0], 100))
+    else:
+        if (occurence1 > 1):
+            occurence1 = 1
+        if (occurence2 > 1):
+            occurence2 = 1
+        if (occurence3 > 1):
+            occurence3 = 1
+        if (occurence4 > 1):
+            occurence4 = 1
+        if (occurence5 > 1):
+            occurence5 = 1
+        occurence = occurence1 + occurence2 + occurence3 + occurence4 + occurence5
+        proba = 100 * (factorial(5 - occurence) / pow(6, (5 - occurence)))
+        print("Chances to get a %d %s: %.2f%%" % (die_nb, combination[0], proba))
+
+
+def error_check():
+    if (len(sys.argv) != 7):
+        sys.exit(84)
+
+    nb_zero = 0
+    if (sys.argv[1] == "0"):
+        nb_zero += 1
+    if (sys.argv[2] == "0"):
+        nb_zero += 1
+    if (sys.argv[3] == "0"):
+        nb_zero += 1
+    if (sys.argv[4] == "0"):
+        nb_zero += 1
+    if (sys.argv[5] == "0"):
+        nb_zero += 1
+    if (nb_zero > 0 and nb_zero < 5):
+        sys.exit(84)
+
+
+def main():
+    error_check()
+    try:
+        dice = [int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5])]
+    except ValueError:
+        sys.exit(84)
+
+    for i in dice:
+        if (i < 0 or i > 6):
+            sys.exit(84)
+
+    combination = sys.argv[6].split('_')
+
+    if (combination[0] != "pair" and combination[0] != "three"
+        and combination[0] != "four" and combination[0] != "full"
+            and combination[0] != "straight" and combination[0] != "yams"):
+        sys.exit(84)
+    
+    if (int(combination[1]) < 0 or int(combination[1]) > 6):
+        sys.exit(84)
+
+    if (combination[0] == "yams"):
+        yams(dice, combination)
+    if (combination[0] == "straight"):
+        straight(dice, combination)
+    if (combination[0] == "full"):
+        full(dice, combination)
+    if (combination[0] == "four"):
+        four(dice, combination)
+    if (combination[0] == "three"):
+        three(dice, combination)
+    if (combination[0] == "pair"):
+        pair(dice, combination)
+
+
+main()
